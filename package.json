@@ -1,0 +1,40 @@
+{
+  "name": "@partylikeits1983/statistics_solidity",
+  "dependencies": {
+    "@stdlib/stats-base-dists-beta-cdf": "^0.0.7",
+    "chai": "^4.3.6",
+    "eth-gas-reporter": "^0.2.25",
+    "hardhat-abi-exporter": "^2.10.0",
+    "hardhat-deploy": "^0.11.12",
+    "hardhat-gas-reporter": "^1.0.8",
+    "mathjs": "^11.0.1",
+    "solidity-coverage": "^0.7.21",
+    "solidity-docgen": "^0.6.0-beta.22"
+  },
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.1.0",
+    "@nomiclabs/hardhat-waffle": "^2.0.3",
+    "ethereum-waffle": "^3.4.4",
+    "ethers": "^5.6.9",
+    "hardhat": "^2.10.1"
+  },
+  "description": "#### `Statitics Functions` in Solidity",
+  "version": "1.0.1",
+  "main": "hardhat.config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DeltaDex-Protocol/statistics_solidity.git"
+  },
+  "author": "DeltaDex & partylikeits1983",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DeltaDex-Protocol/statistics_solidity/issues"
+  },
+  "homepage": "https://github.com/DeltaDex-Protocol/statistics_solidity#readme"
+}
