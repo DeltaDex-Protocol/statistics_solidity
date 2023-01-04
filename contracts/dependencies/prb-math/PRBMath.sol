@@ -1,99 +1,9 @@
-// SPDX-License-Identifier: Unlicense
-pragma solidity >=0.8.4;
-
-/// @notice Emitted when the result overflows uint256.
-error PRBMath__MulDivFixedPointOverflow(uint256 prod1);
-
-/// @notice Emitted when the result overflows uint256.
-error PRBMath__MulDivOverflow(uint256 prod1, uint256 denominator);
-
-/// @notice Emitted when one of the inputs is type(int256).min.
-error PRBMath__MulDivSignedInputTooSmall();
-
-/// @notice Emitted when the intermediary absolute result overflows int256.
-error PRBMath__MulDivSignedOverflow(uint256 rAbs);
-
-/// @notice Emitted when the input is MIN_SD59x18.
-error PRBMathSD59x18__AbsInputTooSmall();
-
-/// @notice Emitted when ceiling a number overflows SD59x18.
-error PRBMathSD59x18__CeilOverflow(int256 x);
-
-/// @notice Emitted when one of the inputs is MIN_SD59x18.
-error PRBMathSD59x18__DivInputTooSmall();
-
-/// @notice Emitted when one of the intermediary unsigned results overflows SD59x18.
-error PRBMathSD59x18__DivOverflow(uint256 rAbs);
-
-/// @notice Emitted when the input is greater than 133.084258667509499441.
-error PRBMathSD59x18__ExpInputTooBig(int256 x);
-
-/// @notice Emitted when the input is greater than 192.
-error PRBMathSD59x18__Exp2InputTooBig(int256 x);
-
-/// @notice Emitted when flooring a number underflows SD59x18.
-error PRBMathSD59x18__FloorUnderflow(int256 x);
-
-/// @notice Emitted when converting a basic integer to the fixed-point format overflows SD59x18.
-error PRBMathSD59x18__FromIntOverflow(int256 x);
-
-/// @notice Emitted when converting a basic integer to the fixed-point format underflows SD59x18.
-error PRBMathSD59x18__FromIntUnderflow(int256 x);
-
-/// @notice Emitted when the product of the inputs is negative.
-error PRBMathSD59x18__GmNegativeProduct(int256 x, int256 y);
-
-/// @notice Emitted when multiplying the inputs overflows SD59x18.
-error PRBMathSD59x18__GmOverflow(int256 x, int256 y);
-
-/// @notice Emitted when the input is less than or equal to zero.
-error PRBMathSD59x18__LogInputTooSmall(int256 x);
-
-/// @notice Emitted when one of the inputs is MIN_SD59x18.
-error PRBMathSD59x18__MulInputTooSmall();
-
-/// @notice Emitted when the intermediary absolute result overflows SD59x18.
-error PRBMathSD59x18__MulOverflow(uint256 rAbs);
-
-/// @notice Emitted when the intermediary absolute result overflows SD59x18.
-error PRBMathSD59x18__PowuOverflow(uint256 rAbs);
-
-/// @notice Emitted when the input is negative.
-error PRBMathSD59x18__SqrtNegativeInput(int256 x);
-
-/// @notice Emitted when the calculating the square root overflows SD59x18.
-error PRBMathSD59x18__SqrtOverflow(int256 x);
-
-/// @notice Emitted when addition overflows UD60x18.
-error PRBMathUD60x18__AddOverflow(uint256 x, uint256 y);
-
-/// @notice Emitted when ceiling a number overflows UD60x18.
-error PRBMathUD60x18__CeilOverflow(uint256 x);
-
-/// @notice Emitted when the input is greater than 133.084258667509499441.
-error PRBMathUD60x18__ExpInputTooBig(uint256 x);
-
-/// @notice Emitted when the input is greater than 192.
-error PRBMathUD60x18__Exp2InputTooBig(uint256 x);
-
-/// @notice Emitted when converting a basic integer to the fixed-point format format overflows UD60x18.
-error PRBMathUD60x18__FromUintOverflow(uint256 x);
-
-/// @notice Emitted when multiplying the inputs overflows UD60x18.
-error PRBMathUD60x18__GmOverflow(uint256 x, uint256 y);
-
-/// @notice Emitted when the input is less than 1.
-error PRBMathUD60x18__LogInputTooSmall(uint256 x);
-
-/// @notice Emitted when the calculating the square root overflows UD60x18.
-error PRBMathUD60x18__SqrtOverflow(uint256 x);
-
-/// @notice Emitted when subtraction underflows UD60x18.
-error PRBMathUD60x18__SubUnderflow(uint256 x, uint256 y);
+// SPDX-License-Identifier: WTFPL
+pragma solidity >=0.8.0;
 
 /// @dev Common mathematical functions used in both PRBMathSD59x18 and PRBMathUD60x18. Note that this shared library
 /// does not always assume the signed 59.18-decimal fixed-point or the unsigned 60.18-decimal fixed-point
-/// representation. When it does not, it is explicitly mentioned in the NatSpec documentation.
+// representation. When it does not, it is annonated in the function's NatSpec documentation.
 library PRBMath {
     /// STRUCTS ///
 
@@ -114,10 +24,7 @@ library PRBMath {
     uint256 internal constant SCALE_LPOTD = 262144;
 
     /// @dev SCALE inverted mod 2^256.
-    uint256 internal constant SCALE_INVERSE =
-        78156646155174841979727994598816262306175212592076161876661_508869554232690281;
-
-    /// FUNCTIONS ///
+    uint256 internal constant SCALE_INVERSE = 78156646155174841979727994598816262306175212592076161876661508869554232690281;
 
     /// @notice Calculates the binary exponent of x using the binary fraction method.
     /// @dev Has to use 192.64-bit fixed-point numbers.
@@ -407,18 +314,17 @@ library PRBMath {
             prod1 := sub(sub(mm, prod0), lt(mm, prod0))
         }
 
-        // Handle non-overflow cases, 256 by 256 division.
+        // Handle non-overflow cases, 256 by 256 division
         if (prod1 == 0) {
-            unchecked {
-                result = prod0 / denominator;
+            require(denominator > 0);
+            assembly {
+                result := div(prod0, denominator)
             }
             return result;
         }
 
         // Make sure the result is less than 2^256. Also prevents denominator == 0.
-        if (prod1 >= denominator) {
-            revert PRBMath__MulDivOverflow(prod1, denominator);
-        }
+        require(denominator > prod1);
 
         ///////////////////////////////////////////////
         // 512 by 256 division.
@@ -430,7 +336,7 @@ library PRBMath {
             // Compute remainder using mulmod.
             remainder := mulmod(x, y, denominator)
 
-            // Subtract 256 bit number from 512 bit number.
+            // Subtract 256 bit number from 512 bit number
             prod1 := sub(prod1, gt(remainder, prod0))
             prod0 := sub(prod0, remainder)
         }
@@ -456,10 +362,10 @@ library PRBMath {
 
             // Invert denominator mod 2^256. Now that denominator is an odd number, it has an inverse modulo 2^256 such
             // that denominator * inv = 1 mod 2^256. Compute the inverse by starting with a seed that is correct for
-            // four bits. That is, denominator * inv = 1 mod 2^4.
+            // four bits. That is, denominator * inv = 1 mod 2^4
             uint256 inverse = (3 * denominator) ^ 2;
 
-            // Use the Newton-Raphson iteration to improve the precision. Thanks to Hensel's lifting lemma, this also works
+            // Now use Newton-Raphson iteration to improve the precision. Thanks to Hensel's lifting lemma, this also works
             // in modular arithmetic, doubling the correct bits in each step.
             inverse *= 2 - denominator * inverse; // inverse mod 2^8
             inverse *= 2 - denominator * inverse; // inverse mod 2^16
@@ -469,7 +375,7 @@ library PRBMath {
             inverse *= 2 - denominator * inverse; // inverse mod 2^256
 
             // Because the division is now exact we can divide by multiplying with the modular inverse of denominator.
-            // This will give us the correct result modulo 2^256. Since the preconditions guarantee that the outcome is
+            // This will give us the correct result modulo 2^256. Since the precoditions guarantee that the outcome is
             // less than 2^256, this is the final result. We don't need to compute the high bits of the result and prod1
             // is no longer required.
             result = prod0 * inverse;
@@ -488,7 +394,7 @@ library PRBMath {
     ///
     /// Caveats:
     /// - The body is purposely left uncommented; see the NatSpec comments in "PRBMath.mulDiv" to understand how this works.
-    /// - It is assumed that the result can never be type(uint256).max when x and y solve the following two equations:
+    /// - It is assumed that the result can never be type(uint256).max when x and y solve the following two queations:
     ///     1. x * y = type(uint256).max * SCALE
     ///     2. (x * y) % SCALE >= SCALE / 2
     ///
@@ -504,10 +410,6 @@ library PRBMath {
             prod1 := sub(sub(mm, prod0), lt(mm, prod0))
         }
 
-        if (prod1 >= SCALE) {
-            revert PRBMath__MulDivFixedPointOverflow(prod1);
-        }
-
         uint256 remainder;
         uint256 roundUpUnit;
         assembly {
@@ -521,6 +423,8 @@ library PRBMath {
                 return result;
             }
         }
+
+        require(SCALE > prod1);
 
         assembly {
             result := add(
@@ -553,9 +457,9 @@ library PRBMath {
         int256 y,
         int256 denominator
     ) internal pure returns (int256 result) {
-        if (x == type(int256).min || y == type(int256).min || denominator == type(int256).min) {
-            revert PRBMath__MulDivSignedInputTooSmall();
-        }
+        require(x > type(int256).min);
+        require(y > type(int256).min);
+        require(denominator > type(int256).min);
 
         // Get hold of the absolute values of x, y and the denominator.
         uint256 ax;
@@ -568,10 +472,8 @@ library PRBMath {
         }
 
         // Compute the absolute value of (x*y)÷denominator. The result must fit within int256.
-        uint256 rAbs = mulDiv(ax, ay, ad);
-        if (rAbs > uint256(type(int256).max)) {
-            revert PRBMath__MulDivSignedOverflow(rAbs);
-        }
+        uint256 resultUnsigned = mulDiv(ax, ay, ad);
+        require(resultUnsigned <= uint256(type(int256).max));
 
         // Get the signs of x, y and the denominator.
         uint256 sx;
@@ -585,7 +487,7 @@ library PRBMath {
 
         // XOR over sx, sy and sd. This is checking whether there are one or three negative signs in the inputs.
         // If yes, the result should be negative.
-        result = sx ^ sy ^ sd == 0 ? -int256(rAbs) : int256(rAbs);
+        result = sx ^ sy ^ sd == 0 ? -int256(resultUnsigned) : int256(resultUnsigned);
     }
 
     /// @notice Calculates the square root of x, rounding down.
@@ -601,7 +503,7 @@ library PRBMath {
             return 0;
         }
 
-        // Set the initial guess to the least power of two that is greater than or equal to sqrt(x).
+        // Set the initial guess to the closest power of two that is higher than x.
         uint256 xAux = uint256(x);
         result = 1;
         if (xAux >= 0x100000000000000000000000000000000) {
@@ -628,7 +530,7 @@ library PRBMath {
             xAux >>= 4;
             result <<= 2;
         }
-        if (xAux >= 0x4) {
+        if (xAux >= 0x8) {
             result <<= 1;
         }
 
